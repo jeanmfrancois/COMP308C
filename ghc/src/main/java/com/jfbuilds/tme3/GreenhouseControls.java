@@ -1,12 +1,9 @@
 package com.jfbuilds.tme3;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.Scanner;
 
 // : innerclasses/GreenhouseControls.java
 // This produces a specific application of the
@@ -225,13 +222,13 @@ public class GreenhouseControls extends Controller {
 		@Override
 		public void action() {
 			// addEvent(new ThermostatDay(0));
-			addEvent(new LightOn(5000));
+			// addEvent(new LightOn(5000));
 			// addEvent(new WaterOff(8000));
 			// addEvent(new ThermostatNight(10000));
-			addEvent(new Bell(5000, 6));
-			addEvent(new Bell(10000, 4));
+			// addEvent(new Bell(5000, 6));
+			// addEvent(new Bell(10000, 4));
 			// addEvent(new WaterOn(6000));
-			addEvent(new LightOff(7000));
+			// addEvent(new LightOff(7000));
 			// addEvent(new Terminate(24000));
 		}
 
@@ -258,6 +255,9 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
+	/**
+	 * Print valid options to be supplied as arguments for application execution
+	 */
 	public static void printUsage() {
 		System.out.println("Correct format: ");
 		System.out.println("  java GreenhouseControls -f <filename>, or");
@@ -265,45 +265,32 @@ public class GreenhouseControls extends Controller {
 	}
 
 	// ---------------------------------------------------------
+	/**
+	 * Entry point of application to check if file was supplied to run events or
+	 * if a dump should be loaded for restoration
+	 * 
+	 * @param args
+	 *            to either signify a filename for processing [-f] or a dump
+	 *            file to restore from [-d]
+	 */
 	public static void main(String[] args) {
-		// try {
-		// String option = args[0];
-		// String filename = args[1];
-		// if (!(option.equals("-f")) && !(option.equals("-d"))) {
-		// System.out.println("Invalid option");
-		// printUsage();
-		// }
-		// GreenhouseControls gc = new GreenhouseControls();
-		// if (option.equals("-f")) {
-		// System.out.println("adding file");
-		// gc.addEvent(gc.new Restart(0, filename));
-		// }
-		// gc.run();
-		// } catch (ArrayIndexOutOfBoundsException e) {
-		// System.out.println("Invalid number of parameters");
-		// printUsage();
-		// }
-		// TODO Temporary
-		GreenhouseControls gc = new GreenhouseControls();
-		String fileName = "examples2.txt";
-		String curDir = System.getProperty("user.dir");
 		try {
-			// System.out.println("Current dir using System:" + currentDir);
-			Path path = Paths.get(curDir, fileName);
-			BufferedReader br = Files.newBufferedReader(path, Charset.forName("ASCII"));
-			System.out.println(br.readLine());
-			String curLine;
-			while ((curLine = br.readLine()) != null) {
-				System.out.println("...");
-				System.out.println(curLine);
-				gc.parseEvent(curLine);
+			String option = args[0];
+			String filename = args[1];
+			if (!(option.equals("-f")) && !(option.equals("-d"))) {
+				System.out.println("Invalid option");
+				printUsage();
 			}
-		} catch (IOException e) {
-			System.out.println("Could not locate the file " + fileName + " in location " + curDir);
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			GreenhouseControls gc = new GreenhouseControls();
+			if (option.equals("-f")) {
+				System.out.println("adding file");
+				gc.loadEvents(filename);
+			}
+			gc.run();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.out.println("Invalid number of parameters");
+			printUsage();
 		}
-		gc.run();
 	}
 
 	/**
@@ -319,14 +306,12 @@ public class GreenhouseControls extends Controller {
 		int arg = 0;
 		String[] tokens = eventLine.split(",");
 		System.out.println("Tokens" + Arrays.toString(tokens));
-		// for (String s : tokens) {
 		eventName = tokens[0].split("=")[1];
 		timeDelay = Long.parseLong(tokens[1].split("=")[1]);
 		System.out.println("length " + tokens.length);
 		if (tokens.length > 2 && tokens.length < 4) {
 			arg = Integer.parseInt(tokens[2].split("=")[1]);
 		}
-		// }
 		System.out.println("Event Name: " + eventName + " - Time Delay: " + timeDelay + " Argument: " + arg);
 		createEvent(eventName, timeDelay, arg);
 	}
@@ -395,6 +380,25 @@ public class GreenhouseControls extends Controller {
 			break;
 		default:
 			System.out.println("error in creating event: " + eventName);
+		}
+	}
+
+	/**
+	 * Loads events for a GreenhouseController
+	 * 
+	 * @param fileName
+	 *            The name of the file containing events to be loaded
+	 */
+	private void loadEvents(String fileName) {
+		File file = new File(fileName);
+		try (Scanner scanner = new Scanner(file)) {
+			while (scanner.hasNext()) {
+				parseEvent(scanner.next());
+			}
+			scanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Could not locate the file " + fileName);
+			e.printStackTrace();
 		}
 	}
 } // /:~
