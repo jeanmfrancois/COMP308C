@@ -13,7 +13,7 @@
  *
  */
 
-package tme3;
+package com.jfbuilds.tme3;
 import java.util.*;
 
 
