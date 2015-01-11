@@ -29,8 +29,13 @@ public class GreenhouseControls extends Controller {
 
 	private boolean fans = false;
 
-	// private boolean power = false;
+	private boolean windowsok = true;
+
+	private boolean poweron = true;
+
 	private String thermostat = "Day";
+
+	private int errorCode = 0;
 
 	private String eventsFile = "examples1.txt";
 
@@ -148,6 +153,46 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
+	public class WindowMalfunction extends Event {
+
+		public WindowMalfunction(long delayTime) {
+			super(delayTime);
+		}
+
+		@Override
+		public void action() throws ControllerException {
+			// Put hardware control code here to
+			// physically turn off the fans.
+			windowsok = false;
+			throw new ControllerException(1);
+		}
+
+		@Override
+		public String toString() {
+			return "Window malfunction occurred";
+		}
+	}
+
+	public class PowerOut extends Event {
+
+		public PowerOut(long delayTime) {
+			super(delayTime);
+		}
+
+		@Override
+		public void action() throws ControllerException {
+			// Put hardware control code here to
+			// physically turn on the fans.
+			poweron = false;
+			throw new ControllerException(2);
+		}
+
+		@Override
+		public String toString() {
+			return "Power outage oocurred";
+		}
+	}
+
 	public class ThermostatNight extends Event {
 
 		public ThermostatNight(long delayTime) {
@@ -221,6 +266,7 @@ public class GreenhouseControls extends Controller {
 
 		@Override
 		public void action() {
+			loadEvents(eventsFile);
 			// addEvent(new ThermostatDay(0));
 			// addEvent(new LightOn(5000));
 			// addEvent(new WaterOff(8000));
@@ -256,41 +302,42 @@ public class GreenhouseControls extends Controller {
 	}
 
 	/**
+	 * ControllerException is thrown when an error occurs in
+	 * GreenhouseController
+	 * 
+	 * @author Jean-francois Nepton
+	 * @version %I%, %G%
+	 * @since 1.0
+	 */
+	public class ControllerException extends Exception {
+
+		/**
+		 * @param i
+		 */
+		public ControllerException(int i) {
+			errorCode = i;
+		}
+
+		@Override
+		public String getMessage() {
+			switch (errorCode) {
+			case 1:
+				return "The Greenhouse Controller has experienced a power failure error.";
+			case 2:
+				return "The Greenhouse Controller has experienced a window malfunction error.";
+			default:
+				return "An unknown error has occured.";
+			}
+		}
+	}
+
+	/**
 	 * Print valid options to be supplied as arguments for application execution
 	 */
-	public static void printUsage() {
+	private static void printUsage() {
 		System.out.println("Correct format: ");
 		System.out.println("  java GreenhouseControls -f <filename>, or");
 		System.out.println("  java GreenhouseControls -d dump.out");
-	}
-
-	// ---------------------------------------------------------
-	/**
-	 * Entry point of application to check if file was supplied to run events or
-	 * if a dump should be loaded for restoration
-	 * 
-	 * @param args
-	 *            to either signify a filename for processing [-f] or a dump
-	 *            file to restore from [-d]
-	 */
-	public static void main(String[] args) {
-		try {
-			String option = args[0];
-			String filename = args[1];
-			if (!(option.equals("-f")) && !(option.equals("-d"))) {
-				System.out.println("Invalid option");
-				printUsage();
-			}
-			GreenhouseControls gc = new GreenhouseControls();
-			if (option.equals("-f")) {
-				System.out.println("adding file");
-				gc.loadEvents(filename);
-			}
-			gc.run();
-		} catch (ArrayIndexOutOfBoundsException e) {
-			System.out.println("Invalid number of parameters");
-			printUsage();
-		}
 	}
 
 	/**
@@ -300,7 +347,7 @@ public class GreenhouseControls extends Controller {
 	 * @param eventLine
 	 *            The event line of text to parse
 	 */
-	public void parseEvent(String eventLine) {
+	private void parseEvent(String eventLine) {
 		String eventName = null;
 		Long timeDelay = null;
 		int arg = 0;
@@ -368,8 +415,7 @@ public class GreenhouseControls extends Controller {
 			break;
 		case "WindowMalfunction":
 			System.out.println("Window Malfunction");
-			// TODO add window malfunction event
-			// addEvent(new WindowMalfunction(timeDelay));
+			addEvent(new WindowMalfunction(timeDelay));
 			break;
 		case "Bell":
 			System.out.println("bell");
@@ -399,6 +445,42 @@ public class GreenhouseControls extends Controller {
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not locate the file " + fileName);
 			e.printStackTrace();
+		}
+	}
+
+	@Override
+	void shutdown() {
+		super.shutdown();
+		System.out.println("METHOD IS RUN TO TAKE A DUMP");
+		System.exit(0);
+	}
+
+	// ---------------------------------------------------------
+	/**
+	 * Entry point of application to check if file was supplied to run events or
+	 * if a dump should be loaded for restoration
+	 * 
+	 * @param args
+	 *            to either signify a filename for processing [-f] or a dump
+	 *            file to restore from [-d]
+	 */
+	public static void main(String[] args) {
+		try {
+			String option = args[0];
+			String filename = args[1];
+			if (!(option.equals("-f")) && !(option.equals("-d"))) {
+				System.out.println("Invalid option");
+				printUsage();
+			}
+			GreenhouseControls gc = new GreenhouseControls();
+			if (option.equals("-f")) {
+				System.out.println("adding file");
+				gc.loadEvents(filename);
+			}
+			gc.run();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.out.println("Invalid number of parameters");
+			printUsage();
 		}
 	}
 } // /:~
