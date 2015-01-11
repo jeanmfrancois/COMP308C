@@ -426,6 +426,10 @@ public class GreenhouseControls extends Controller implements Serializable {
 			System.out.println("Window Malfunction");
 			addEvent(new WindowMalfunction(timeDelay));
 			break;
+		case "PowerOut":
+			System.out.println("Power Out");
+			addEvent(new PowerOut(timeDelay));
+			break;
 		case "Bell":
 			System.out.println("bell");
 			if (arg != 0)
