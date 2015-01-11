@@ -11,12 +11,13 @@
  */
 package com.jfbuilds.tme3;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.jfbuilds.tme3.GreenhouseControls.ControllerException;
 
-public class Controller {
+public class Controller implements Serializable {
 
 	// A class from java.util to hold Event objects:
 	private List<Event> eventList = new ArrayList<Event>();
@@ -36,17 +37,19 @@ public class Controller {
 						event.action();
 					} catch (ControllerException e) {
 						// TODO Auto-generated catch block
-						System.out.println(e.getMessage());
-						shutdown();
+						shutdown(e.getMessage());
 					}
 					eventList.remove(event);
 				}
 	}
 
 	/**
-	 * Shuts down the system
+	 * Shutdown the system
+	 * 
+	 * @param errorMessage
+	 *            to be logged for detailing cause of error
 	 */
-	void shutdown() {
+	void shutdown(String errorMessage) {
 		System.out.println("System will be shut down...");
 	}
 } // /:~

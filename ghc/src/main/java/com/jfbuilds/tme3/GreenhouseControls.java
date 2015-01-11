@@ -1,9 +1,18 @@
 package com.jfbuilds.tme3;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 // : innerclasses/GreenhouseControls.java
 // This produces a specific application of the
@@ -19,7 +28,7 @@ import java.util.Scanner;
  * @author: Steve Leung
  * @date : Oct 21, 2005
  */
-public class GreenhouseControls extends Controller {
+public class GreenhouseControls extends Controller implements Serializable {
 
 	private long initTime = System.currentTimeMillis();
 
@@ -37,9 +46,9 @@ public class GreenhouseControls extends Controller {
 
 	private int errorCode = 0;
 
-	private String eventsFile = "examples1.txt";
+	private String eventsFile = "";
 
-	public class LightOn extends Event {
+	public class LightOn extends Event implements Serializable {
 
 		public LightOn(long delayTime) {
 			super(delayTime);
@@ -59,7 +68,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class LightOff extends Event {
+	public class LightOff extends Event implements Serializable {
 
 		public LightOff(long delayTime) {
 			super(delayTime);
@@ -79,7 +88,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class WaterOn extends Event {
+	public class WaterOn extends Event implements Serializable {
 
 		public WaterOn(long delayTime) {
 			super(delayTime);
@@ -97,7 +106,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class WaterOff extends Event {
+	public class WaterOff extends Event implements Serializable {
 
 		public WaterOff(long delayTime) {
 			super(delayTime);
@@ -115,7 +124,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class FansOn extends Event {
+	public class FansOn extends Event implements Serializable {
 
 		public FansOn(long delayTime) {
 			super(delayTime);
@@ -134,7 +143,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class FansOff extends Event {
+	public class FansOff extends Event implements Serializable {
 
 		public FansOff(long delayTime) {
 			super(delayTime);
@@ -153,7 +162,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class WindowMalfunction extends Event {
+	public class WindowMalfunction extends Event implements Serializable {
 
 		public WindowMalfunction(long delayTime) {
 			super(delayTime);
@@ -173,7 +182,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class PowerOut extends Event {
+	public class PowerOut extends Event implements Serializable {
 
 		public PowerOut(long delayTime) {
 			super(delayTime);
@@ -193,7 +202,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class ThermostatNight extends Event {
+	public class ThermostatNight extends Event implements Serializable {
 
 		public ThermostatNight(long delayTime) {
 			super(delayTime);
@@ -211,7 +220,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class ThermostatDay extends Event {
+	public class ThermostatDay extends Event implements Serializable {
 
 		public ThermostatDay(long delayTime) {
 			super(delayTime);
@@ -231,7 +240,7 @@ public class GreenhouseControls extends Controller {
 
 	// An example of an action() that inserts a
 	// new one of itself into the event list:
-	public class Bell extends Event {
+	public class Bell extends Event implements Serializable {
 
 		private int rings;
 
@@ -257,7 +266,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class Restart extends Event {
+	public class Restart extends Event implements Serializable {
 
 		public Restart(long delayTime, String filename) {
 			super(delayTime);
@@ -284,7 +293,7 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
-	public class Terminate extends Event {
+	public class Terminate extends Event implements Serializable {
 
 		public Terminate(long delayTime) {
 			super(delayTime);
@@ -322,9 +331,9 @@ public class GreenhouseControls extends Controller {
 		public String getMessage() {
 			switch (errorCode) {
 			case 1:
-				return "The Greenhouse Controller has experienced a power failure error.";
-			case 2:
 				return "The Greenhouse Controller has experienced a window malfunction error.";
+			case 2:
+				return "The Greenhouse Controller has experienced a power failure error.";
 			default:
 				return "An unknown error has occured.";
 			}
@@ -448,10 +457,55 @@ public class GreenhouseControls extends Controller {
 		}
 	}
 
+	private void severeLog(String message) {
+		Logger logger = Logger.getLogger("Greenhouse Controller Log");
+		FileHandler fileHandler;
+		try {
+			fileHandler = new FileHandler("error.log");
+			logger.addHandler(fileHandler);
+			SimpleFormatter formatter = new SimpleFormatter();
+			fileHandler.setFormatter(formatter);
+			logger.severe("System was shut down unexpectedly - " + message);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void dumpGreenhouseControls(GreenhouseControls gc) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream("dump.out");
+				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+			oos.writeObject(gc);
+			System.out.printf("Greenhouse Controller has been dumped");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static GreenhouseControls restoreGreenhouseControls() throws IOException {
+		try (FileInputStream fis = new FileInputStream("dump.out"); ObjectInputStream ois = new ObjectInputStream(fis)) {
+			System.out.println("Deserialized Greenhouse Controls...");
+			return (GreenhouseControls) ois.readObject();
+		} catch (Exception e) {
+			System.out
+					.println("There was a problem deserializing Greenhouse Controls, system will use an empty Greenhouse Controls");
+			e.printStackTrace();
+			return new GreenhouseControls();
+		}
+	}
+
 	@Override
-	void shutdown() {
-		super.shutdown();
+	void shutdown(String errorMessage) {
+		super.shutdown(errorMessage);
+		severeLog(errorMessage);
 		System.out.println("METHOD IS RUN TO TAKE A DUMP");
+		try {
+			dumpGreenhouseControls(this);
+		} catch (IOException e) {
+			System.out.println("Error in writing Greenhouse Controls dump file.");
+			e.printStackTrace();
+		}
 		System.exit(0);
 	}
 
@@ -468,19 +522,27 @@ public class GreenhouseControls extends Controller {
 		try {
 			String option = args[0];
 			String filename = args[1];
+			GreenhouseControls gc;
 			if (!(option.equals("-f")) && !(option.equals("-d"))) {
 				System.out.println("Invalid option");
 				printUsage();
 			}
-			GreenhouseControls gc = new GreenhouseControls();
+			// GreenhouseControls gc = new GreenhouseControls();
 			if (option.equals("-f")) {
+				gc = new GreenhouseControls();
 				System.out.println("adding file");
 				gc.loadEvents(filename);
+			} else {
+				gc = restoreGreenhouseControls();
+				System.out.println("file restored..");
 			}
 			gc.run();
 		} catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println("Invalid number of parameters");
 			printUsage();
+		} catch (IOException e) {
+			System.out.println("There was an error in reading dump file: dump.out");
+			e.printStackTrace();
 		}
 	}
 } // /:~
