@@ -9,6 +9,14 @@
  * @author: Steve Leung
  * @date : Oct 21, 2006
  */
+/**
+ * File Name: Controller.java<br>
+ * Jean-francois Nepton<br>
+ * COMP 308 Java for Programmers<br>
+ * Cordinator: Dr. Xiaokun Zhang<br>
+ * Student ID# 2358976<br>
+ * Created: Nov 3, 2015
+ */
 package com.jfbuilds.tme3;
 
 import java.io.Serializable;
@@ -24,6 +32,14 @@ public class Controller implements Serializable {
 
 	public void addEvent(Event c) {
 		eventList.add(c);
+	}
+
+	public List<Event> getEventList() {
+		return eventList;
+	}
+
+	public void setEventList(ArrayList<Event> newList) {
+		eventList = newList;
 	}
 
 	public void run() {

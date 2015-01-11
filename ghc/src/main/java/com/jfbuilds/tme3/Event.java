@@ -9,6 +9,14 @@
  * @author: Steve Leung
  * @date : Oct. 21, 2006 Description: Event abstract class
  */
+/**
+ * File Name: Event.java<br>
+ * Jean-francois Nepton<br>
+ * COMP 308 Java for Programmers<br>
+ * Cordinator: Dr. Xiaokun Zhang<br>
+ * Student ID# 2358976<br>
+ * Created: Nov 3, 2015
+ */
 package com.jfbuilds.tme3;
 
 import java.io.Serializable;

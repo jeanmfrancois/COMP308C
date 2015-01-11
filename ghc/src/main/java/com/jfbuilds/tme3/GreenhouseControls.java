@@ -1,19 +1,3 @@
-package com.jfbuilds.tme3;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-
 // : innerclasses/GreenhouseControls.java
 // This produces a specific application of the
 // control system, all in a single class. Inner
@@ -28,6 +12,29 @@ import java.util.logging.SimpleFormatter;
  * @author: Steve Leung
  * @date : Oct 21, 2005
  */
+/**
+ * File Name: GreenhouseControls.java<br>
+ * Jean-francois Nepton<br>
+ * COMP 308 Java for Programmers<br>
+ * Cordinator: Dr. Xiaokun Zhang<br>
+ * Student ID# 2358976<br>
+ * Created: Nov 3, 2015
+ */
+package com.jfbuilds.tme3;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
 public class GreenhouseControls extends Controller implements Serializable {
 
 	private long initTime = System.currentTimeMillis();
@@ -242,7 +249,7 @@ public class GreenhouseControls extends Controller implements Serializable {
 	// new one of itself into the event list:
 	public class Bell extends Event implements Serializable {
 
-		private int rings;
+		int rings;
 
 		public Bell(long delayTime) {
 			super(delayTime);
@@ -311,6 +318,88 @@ public class GreenhouseControls extends Controller implements Serializable {
 	}
 
 	/**
+	 * PowerOn corrects power failure issue
+	 * <p>
+	 * fix turns the power on and zeros out error code
+	 * 
+	 * @author Jean-francois Nepton
+	 * @version %I%, %G%
+	 * @since 1.0
+	 */
+	public class PowerOn implements Fixable {
+
+		/**
+		 * @see com.jfbuilds.tme3.Fixable#fix()
+		 */
+		@Override
+		public void fix() {
+			removeEvent("PowerOut");
+			poweron = true;
+			errorCode = 0;
+			log();
+		}
+
+		/**
+		 * @see com.jfbuilds.tme3.Fixable#log()
+		 */
+		@Override
+		public void log() {
+			Logger logger = Logger.getLogger("Power On Failure Fix");
+			FileHandler fileHandler;
+			try {
+				fileHandler = new FileHandler("fix.log");
+				logger.addHandler(fileHandler);
+				SimpleFormatter formatter = new SimpleFormatter();
+				fileHandler.setFormatter(formatter);
+				logger.info("System has recovered from a power failure error.");
+			} catch (SecurityException | IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * FixWindow corrects window failure issue
+	 * <p>
+	 * fix fixes the window and zeros out error code
+	 * 
+	 * @author Jean-francois Nepton
+	 * @version %I%, %G%
+	 * @since 1.0
+	 */
+	public class FixWindow implements Fixable {
+
+		/**
+		 * @see com.jfbuilds.tme3.Fixable#fix()
+		 */
+		@Override
+		public void fix() {
+			removeEvent("WindowMalfunction");
+			windowsok = true;
+			errorCode = 0;
+			log();
+		}
+
+		/**
+		 * @see com.jfbuilds.tme3.Fixable#log()
+		 */
+		@Override
+		public void log() {
+			Logger logger = Logger.getLogger("Window Malfunction Failure Fix");
+			FileHandler fileHandler;
+			try {
+				fileHandler = new FileHandler("fix.log");
+				logger.addHandler(fileHandler);
+				SimpleFormatter formatter = new SimpleFormatter();
+				fileHandler.setFormatter(formatter);
+				logger.info("System has recovered from a window malfunction error.");
+			} catch (SecurityException | IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
 	 * ControllerException is thrown when an error occurs in
 	 * GreenhouseController
 	 * 
@@ -372,6 +461,96 @@ public class GreenhouseControls extends Controller implements Serializable {
 		createEvent(eventName, timeDelay, arg);
 	}
 
+	private void removeEvent(String eventName) {
+		// List<Event> oldList = getEventList();
+		// setEventList(new ArrayList<Event>());
+		// for (Event event : oldList) {
+		// String className = event.getClass().getSimpleName();
+		// if (!className.equals(eventName))
+		// addEvent(event);
+		// }
+		ArrayList<Event> newList = new ArrayList<Event>();
+		for (Event event : getEventList()) {
+			String className = event.getClass().getSimpleName();
+			if (!className.equals(eventName))
+				newList.add(event);
+		}
+		setEventList(newList);
+	}
+
+	/**
+	 * Loads events for a GreenhouseController
+	 * 
+	 * @param fileName
+	 *            The name of the file containing events to be loaded
+	 */
+	private void loadEvents(String fileName) {
+		File file = new File(fileName);
+		try (Scanner scanner = new Scanner(file)) {
+			while (scanner.hasNext()) {
+				parseEvent(scanner.next());
+			}
+			scanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Could not locate the file " + fileName);
+			e.printStackTrace();
+		}
+	}
+
+	private void severeLog(String message) {
+		Logger logger = Logger.getLogger("Greenhouse Controller Log");
+		FileHandler fileHandler;
+		try {
+			fileHandler = new FileHandler("error.log");
+			logger.addHandler(fileHandler);
+			SimpleFormatter formatter = new SimpleFormatter();
+			fileHandler.setFormatter(formatter);
+			logger.severe("System was shut down unexpectedly - " + message);
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void dumpGreenhouseControls(GreenhouseControls gc) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream("dump.out");
+				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+			oos.writeObject(gc);
+			System.out.printf("Greenhouse Controller has been dumped");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/*
+	 * Returns the current error code, 0 if no error present
+	 */
+	int getError() {
+		return errorCode;
+	}
+
+	/*
+	 * Returns the appropriate fix to currect system failure issues.
+	 */
+	Fixable getFixable(int errorCode) {
+		if (errorCode == 2)
+			return new PowerOn();
+		else
+			return new FixWindow();
+	}
+
+	@Override
+	void shutdown(String errorMessage) {
+		super.shutdown(errorMessage);
+		severeLog(errorMessage);
+		try {
+			dumpGreenhouseControls(this);
+		} catch (IOException e) {
+			System.out.println("Error in writing Greenhouse Controls dump file.");
+			e.printStackTrace();
+		}
+		System.exit(0);
+	}
+
 	/**
 	 * Creates an event based on supplied Event name, timeDelay, and optional
 	 * argument
@@ -384,7 +563,7 @@ public class GreenhouseControls extends Controller implements Serializable {
 	 * @param arg
 	 *            An optional argument supplied to event
 	 */
-	private void createEvent(String eventName, Long timeDelay, int arg) {
+	public void createEvent(String eventName, Long timeDelay, int arg) {
 		switch (eventName) {
 		case "LightOn":
 			System.out.println("Light on");
@@ -442,77 +621,6 @@ public class GreenhouseControls extends Controller implements Serializable {
 		}
 	}
 
-	/**
-	 * Loads events for a GreenhouseController
-	 * 
-	 * @param fileName
-	 *            The name of the file containing events to be loaded
-	 */
-	private void loadEvents(String fileName) {
-		File file = new File(fileName);
-		try (Scanner scanner = new Scanner(file)) {
-			while (scanner.hasNext()) {
-				parseEvent(scanner.next());
-			}
-			scanner.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("Could not locate the file " + fileName);
-			e.printStackTrace();
-		}
-	}
-
-	private void severeLog(String message) {
-		Logger logger = Logger.getLogger("Greenhouse Controller Log");
-		FileHandler fileHandler;
-		try {
-			fileHandler = new FileHandler("error.log");
-			logger.addHandler(fileHandler);
-			SimpleFormatter formatter = new SimpleFormatter();
-			fileHandler.setFormatter(formatter);
-			logger.severe("System was shut down unexpectedly - " + message);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void dumpGreenhouseControls(GreenhouseControls gc) throws IOException {
-		try (FileOutputStream fos = new FileOutputStream("dump.out");
-				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-			oos.writeObject(gc);
-			System.out.printf("Greenhouse Controller has been dumped");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static GreenhouseControls restoreGreenhouseControls() throws IOException {
-		try (FileInputStream fis = new FileInputStream("dump.out"); ObjectInputStream ois = new ObjectInputStream(fis)) {
-			System.out.println("Deserialized Greenhouse Controls...");
-			return (GreenhouseControls) ois.readObject();
-		} catch (Exception e) {
-			System.out
-					.println("There was a problem deserializing Greenhouse Controls, system will use an empty Greenhouse Controls");
-			e.printStackTrace();
-			return new GreenhouseControls();
-		}
-	}
-
-	@Override
-	void shutdown(String errorMessage) {
-		super.shutdown(errorMessage);
-		severeLog(errorMessage);
-		System.out.println("METHOD IS RUN TO TAKE A DUMP");
-		try {
-			dumpGreenhouseControls(this);
-		} catch (IOException e) {
-			System.out.println("Error in writing Greenhouse Controls dump file.");
-			e.printStackTrace();
-		}
-		System.exit(0);
-	}
-
 	// ---------------------------------------------------------
 	/**
 	 * Entry point of application to check if file was supplied to run events or
@@ -526,7 +634,7 @@ public class GreenhouseControls extends Controller implements Serializable {
 		try {
 			String option = args[0];
 			String filename = args[1];
-			GreenhouseControls gc;
+			GreenhouseControls gc = null;
 			if (!(option.equals("-f")) && !(option.equals("-d"))) {
 				System.out.println("Invalid option");
 				printUsage();
@@ -537,16 +645,15 @@ public class GreenhouseControls extends Controller implements Serializable {
 				System.out.println("adding file");
 				gc.loadEvents(filename);
 			} else {
-				gc = restoreGreenhouseControls();
+				Restore restore = new Restore(filename);
+				gc = restore.recoverGreenhouseControls();
+				gc.getFixable(gc.errorCode).fix();
 				System.out.println("file restored..");
 			}
 			gc.run();
 		} catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println("Invalid number of parameters");
 			printUsage();
-		} catch (IOException e) {
-			System.out.println("There was an error in reading dump file: dump.out");
-			e.printStackTrace();
 		}
 	}
 } // /:~
