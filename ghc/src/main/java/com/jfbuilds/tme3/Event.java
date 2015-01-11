@@ -27,7 +27,7 @@ public abstract class Event implements Serializable {
 
 	private long eventTime;
 
-	private long elapsedTime;
+	private long elapsedTime = 0;
 
 	protected final long delayTime;
 

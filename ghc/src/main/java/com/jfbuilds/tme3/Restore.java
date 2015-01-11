@@ -53,7 +53,6 @@ public class Restore {
 	 */
 	public void retrieveGreenhouseControls() {
 		try (FileInputStream fis = new FileInputStream(fileName); ObjectInputStream ois = new ObjectInputStream(fis)) {
-			System.out.println("Deserialized Greenhouse Controls...");
 			gc = (GreenhouseControls) ois.readObject();
 		} catch (Exception e) {
 			System.out.println("There was a problem deserializing Greenhouse Controls");

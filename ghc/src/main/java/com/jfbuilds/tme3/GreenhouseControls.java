@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -64,12 +63,11 @@ public class GreenhouseControls extends Controller implements Serializable {
 			// Put hardware control code here to
 			// physically turn on the light.
 			light = true;
-			System.out.println("Action to turn light on.. " + " @" + (System.currentTimeMillis() - initTime));
 		}
 
 		@Override
 		public String toString() {
-			return "Light is on.. " + " @" + (System.currentTimeMillis() - initTime);
+			return "Light is on";
 		}
 	}
 
@@ -84,12 +82,11 @@ public class GreenhouseControls extends Controller implements Serializable {
 			// Put hardware control code here to
 			// physically turn off the light.
 			light = false;
-			System.out.println("Action to turn light off.. " + " @" + (System.currentTimeMillis() - initTime));
 		}
 
 		@Override
 		public String toString() {
-			return "Light is off.. " + " @" + (System.currentTimeMillis() - initTime);
+			return "Light is off";
 		}
 	}
 
@@ -203,7 +200,7 @@ public class GreenhouseControls extends Controller implements Serializable {
 
 		@Override
 		public String toString() {
-			return "Power outage oocurred";
+			return "Power outage occurred";
 		}
 	}
 
@@ -256,7 +253,6 @@ public class GreenhouseControls extends Controller implements Serializable {
 		public Bell(long delayTime, int rings) {
 			super(delayTime);
 			this.rings = rings;
-			System.out.println("Bell will ring " + this.rings + " times.. ");
 		}
 
 		@Override
@@ -267,7 +263,7 @@ public class GreenhouseControls extends Controller implements Serializable {
 
 		@Override
 		public String toString() {
-			return "Bing! bah bang (" + rings + ") @" + (System.currentTimeMillis() - initTime);
+			return "Ring-a-ding(" + rings + ")";
 		}
 	}
 
@@ -281,15 +277,6 @@ public class GreenhouseControls extends Controller implements Serializable {
 		@Override
 		public void action() {
 			loadEvents(eventsFile);
-			// addEvent(new ThermostatDay(0));
-			// addEvent(new LightOn(5000));
-			// addEvent(new WaterOff(8000));
-			// addEvent(new ThermostatNight(10000));
-			// addEvent(new Bell(5000, 6));
-			// addEvent(new Bell(10000, 4));
-			// addEvent(new WaterOn(6000));
-			// addEvent(new LightOff(7000));
-			// addEvent(new Terminate(24000));
 		}
 
 		@Override
@@ -448,25 +435,15 @@ public class GreenhouseControls extends Controller implements Serializable {
 		Long timeDelay = null;
 		int arg = 0;
 		String[] tokens = eventLine.split(",");
-		System.out.println("Tokens" + Arrays.toString(tokens));
 		eventName = tokens[0].split("=")[1];
 		timeDelay = Long.parseLong(tokens[1].split("=")[1]);
-		System.out.println("length " + tokens.length);
 		if (tokens.length > 2 && tokens.length < 4) {
 			arg = Integer.parseInt(tokens[2].split("=")[1]);
 		}
-		System.out.println("Event Name: " + eventName + " - Time Delay: " + timeDelay + " Argument: " + arg);
 		createEvent(eventName, timeDelay, arg);
 	}
 
 	private void removeEvent(String eventName) {
-		// List<Event> oldList = getEventList();
-		// setEventList(new ArrayList<Event>());
-		// for (Event event : oldList) {
-		// String className = event.getClass().getSimpleName();
-		// if (!className.equals(eventName))
-		// addEvent(event);
-		// }
 		ArrayList<Event> newList = new ArrayList<Event>();
 		for (Event event : getEventList()) {
 			String className = event.getClass().getSimpleName();
@@ -513,7 +490,6 @@ public class GreenhouseControls extends Controller implements Serializable {
 		try (FileOutputStream fos = new FileOutputStream("dump.out");
 				ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 			oos.writeObject(gc);
-			System.out.printf("Greenhouse Controller has been dumped");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -556,8 +532,6 @@ public class GreenhouseControls extends Controller implements Serializable {
 	private static void saveEventsState(GreenhouseControls gc) {
 		for (Event event : gc.getEventList()) {
 			event.setElapsedTime(event.getEventTime() - System.currentTimeMillis());
-			System.out
-					.println("Elapsed time for " + event.getClass().getSimpleName() + " is " + event.getElapsedTime());
 		}
 	}
 
@@ -576,58 +550,46 @@ public class GreenhouseControls extends Controller implements Serializable {
 	public void createEvent(String eventName, Long timeDelay, int arg) {
 		switch (eventName) {
 		case "LightOn":
-			System.out.println("Light on");
 			addEvent(new LightOn(timeDelay));
 			break;
 		case "LightOff":
-			System.out.println("Light off");
 			addEvent(new LightOff(timeDelay));
 			break;
 		case "WaterOn":
-			System.out.println("Water on");
 			addEvent(new WaterOn(timeDelay));
 			break;
 		case "WaterOff":
-			System.out.println("Water off");
 			addEvent(new WaterOff(timeDelay));
 			break;
 		case "FansOn":
-			System.out.println("Fans on");
 			addEvent(new FansOn(timeDelay));
 			break;
 		case "FansOff":
-			System.out.println("Fans off");
 			addEvent(new FansOff(timeDelay));
 			break;
 		case "ThermostatDay":
-			System.out.println("Thermo Day");
 			addEvent(new ThermostatDay(timeDelay));
 			break;
 		case "ThermostatNight":
 			addEvent(new ThermostatNight(timeDelay));
-			System.out.println("Thermo Night");
 			break;
 		case "Terminate":
-			System.out.println("Terminate");
 			addEvent(new Terminate(timeDelay));
 			break;
 		case "WindowMalfunction":
-			System.out.println("Window Malfunction");
 			addEvent(new WindowMalfunction(timeDelay));
 			break;
 		case "PowerOut":
-			System.out.println("Power Out");
 			addEvent(new PowerOut(timeDelay));
 			break;
 		case "Bell":
-			System.out.println("bell");
 			if (arg != 0)
 				addEvent(new Bell(timeDelay, arg));
 			else
 				addEvent(new Bell(timeDelay));
 			break;
 		default:
-			System.out.println("error in creating event: " + eventName);
+			System.out.println("Error in creating event: " + eventName + ", it will not be added to event list.");
 		}
 	}
 
@@ -651,13 +613,11 @@ public class GreenhouseControls extends Controller implements Serializable {
 			}
 			if (option.equals("-f")) {
 				gc = new GreenhouseControls();
-				System.out.println("adding file");
 				gc.loadEvents(filename);
 			} else {
 				Restore restore = new Restore(filename);
 				gc = restore.recoverGreenhouseControls();
 				gc.getFixable(gc.errorCode).fix();
-				System.out.println("file restored..");
 			}
 			gc.run();
 		} catch (ArrayIndexOutOfBoundsException e) {
