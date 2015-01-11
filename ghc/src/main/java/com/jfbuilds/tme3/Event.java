@@ -27,11 +27,35 @@ public abstract class Event implements Serializable {
 
 	private long eventTime;
 
+	private long elapsedTime;
+
 	protected final long delayTime;
 
 	public Event(long delayTime) {
 		this.delayTime = delayTime;
 		start();
+	}
+
+	/**
+	 * @return the eventTime
+	 */
+	public long getEventTime() {
+		return eventTime;
+	}
+
+	/**
+	 * @return the elapsedTime
+	 */
+	public long getElapsedTime() {
+		return elapsedTime;
+	}
+
+	/**
+	 * @param elapsedTime
+	 *            the elapsedTime to set
+	 */
+	public void setElapsedTime(long elapsedTime) {
+		this.elapsedTime = elapsedTime;
 	}
 
 	public void start() { // Allows restarting

@@ -27,6 +27,8 @@ import com.jfbuilds.tme3.GreenhouseControls.ControllerException;
 
 public class Controller implements Serializable {
 
+	long initTime;
+
 	// A class from java.util to hold Event objects:
 	private List<Event> eventList = new ArrayList<Event>();
 
@@ -43,6 +45,7 @@ public class Controller implements Serializable {
 	}
 
 	public void run() {
+		initTime = System.currentTimeMillis();
 		while (eventList.size() > 0)
 			// Make a copy so you're not modifying the list
 			// while you're selecting the elements in it:
@@ -52,7 +55,6 @@ public class Controller implements Serializable {
 					try {
 						event.action();
 					} catch (ControllerException e) {
-						// TODO Auto-generated catch block
 						shutdown(e.getMessage());
 					}
 					eventList.remove(event);

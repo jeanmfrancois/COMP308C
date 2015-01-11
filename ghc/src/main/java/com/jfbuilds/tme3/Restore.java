@@ -73,9 +73,9 @@ public class Restore {
 			String className = event.getClass().getSimpleName();
 			if (className.equals("Bell")) {
 				Bell bell = (Bell) event;
-				gc.createEvent(className, bell.delayTime, bell.rings);
+				gc.createEvent(className, bell.delayTime - bell.getElapsedTime(), bell.rings);
 			} else {
-				gc.createEvent(className, event.delayTime, 0);
+				gc.createEvent(className, event.delayTime - event.getElapsedTime(), 0);
 			}
 		}
 	}

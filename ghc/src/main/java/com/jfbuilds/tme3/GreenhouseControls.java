@@ -37,8 +37,6 @@ import java.util.logging.SimpleFormatter;
 
 public class GreenhouseControls extends Controller implements Serializable {
 
-	private long initTime = System.currentTimeMillis();
-
 	private boolean light = false;
 
 	private boolean water = false;
@@ -264,7 +262,7 @@ public class GreenhouseControls extends Controller implements Serializable {
 		@Override
 		public void action() {
 			if (this.rings > 1)
-				addEvent(new Bell(5000, --this.rings));
+				addEvent(new Bell(2000, --this.rings));
 		}
 
 		@Override
@@ -543,12 +541,24 @@ public class GreenhouseControls extends Controller implements Serializable {
 		super.shutdown(errorMessage);
 		severeLog(errorMessage);
 		try {
+			saveEventsState(this);
 			dumpGreenhouseControls(this);
 		} catch (IOException e) {
 			System.out.println("Error in writing Greenhouse Controls dump file.");
 			e.printStackTrace();
 		}
 		System.exit(0);
+	}
+
+	/**
+	 * @param greenhouseControls
+	 */
+	private static void saveEventsState(GreenhouseControls gc) {
+		for (Event event : gc.getEventList()) {
+			event.setElapsedTime(event.getEventTime() - System.currentTimeMillis());
+			System.out
+					.println("Elapsed time for " + event.getClass().getSimpleName() + " is " + event.getElapsedTime());
+		}
 	}
 
 	/**
@@ -639,7 +649,6 @@ public class GreenhouseControls extends Controller implements Serializable {
 				System.out.println("Invalid option");
 				printUsage();
 			}
-			// GreenhouseControls gc = new GreenhouseControls();
 			if (option.equals("-f")) {
 				gc = new GreenhouseControls();
 				System.out.println("adding file");
