@@ -25,25 +25,62 @@ import java.util.List;
 
 import com.jfbuilds.tme3.GreenhouseControls.ControllerException;
 
+/**
+ * Controller base class and framework for a control unit
+ * <p>
+ * Initiation time of the system and an event list of controller events are
+ * related fields
+ * <p>
+ * Methods to add events, get the event list, run the controller and for
+ * emergency shutdown exist for class
+ * 
+ * @author Jean-francois Nepton
+ * @version %I%, %G%
+ * @since 1.0
+ */
 public class Controller implements Serializable {
+
+	/**
+	 * Used for serialization
+	 */
+	private static final long serialVersionUID = 4320323286381869030L;
 
 	long initTime;
 
-	// A class from java.util to hold Event objects:
 	private List<Event> eventList = new ArrayList<Event>();
 
-	public void addEvent(Event c) {
-		eventList.add(c);
+	/**
+	 * Adds an event to the stored event list
+	 * 
+	 * @param event
+	 *            the event to be added
+	 */
+	public void addEvent(Event event) {
+		eventList.add(event);
 	}
 
+	/**
+	 * Getter for retrieving the stored event list
+	 * 
+	 * @return the stored event list
+	 */
 	public List<Event> getEventList() {
 		return eventList;
 	}
 
+	/**
+	 * Setter for the event list to another event list
+	 * 
+	 * @param newList
+	 *            the new list to be stored
+	 */
 	public void setEventList(ArrayList<Event> newList) {
 		eventList = newList;
 	}
 
+	/**
+	 * Runs the controller when called, performing actions when they are ready
+	 */
 	public void run() {
 		initTime = System.currentTimeMillis();
 		while (eventList.size() > 0)
@@ -62,7 +99,7 @@ public class Controller implements Serializable {
 	}
 
 	/**
-	 * Shutdown the system
+	 * Shutdown the system usually due to an emergency shutdown
 	 * 
 	 * @param errorMessage
 	 *            to be logged for detailing cause of error

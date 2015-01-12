@@ -18,9 +18,10 @@ import com.jfbuilds.tme3.GreenhouseControls.Bell;
 /**
  * Restore Used to restore the system after a system failure
  * <p>
- * (description of core fields)
+ * fileName is used to refer to the restoration file location gc referes to the
+ * related GreenhousControls object associated to restoration
  * <p>
- * (description of core methods)
+ * Methods exist to deserialize the the recovered GreenhouseControls object
  * 
  * @author Jean-francois Nepton
  * @version %I%, %G%
@@ -33,14 +34,20 @@ public class Restore {
 	private GreenhouseControls gc = null;
 
 	/**
+	 * Core constructor to create a restore object
+	 * 
 	 * @param fileName
+	 *            is supplied to denote the file to restore
 	 */
 	public Restore(String fileName) {
 		this.fileName = fileName;
 	}
 
 	/**
-	 * @return
+	 * Main process to retrieve the GreenhouseControls, recover it's state and
+	 * return it to calling method
+	 * 
+	 * @return the recovered Greenhouse Controls object
 	 */
 	public GreenhouseControls recoverGreenhouseControls() {
 		retrieveGreenhouseControls();
@@ -49,7 +56,7 @@ public class Restore {
 	}
 
 	/**
-	 * 
+	 * Retrieves the GreenhouseControls object
 	 */
 	public void retrieveGreenhouseControls() {
 		try (FileInputStream fis = new FileInputStream(fileName); ObjectInputStream ois = new ObjectInputStream(fis)) {
@@ -63,7 +70,7 @@ public class Restore {
 	}
 
 	/**
-	 * 
+	 * Restores the state of the recovered GreenhouseControls object
 	 */
 	private void recoverEventsState() {
 		List<Event> oldStateEventList = gc.getEventList();

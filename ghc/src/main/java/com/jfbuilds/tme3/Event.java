@@ -23,7 +23,23 @@ import java.io.Serializable;
 
 import com.jfbuilds.tme3.GreenhouseControls.ControllerException;
 
+/**
+ * Event is base class for any type of event that may occur within a Greenhouse
+ * <p>
+ * (description of core fields)
+ * <p>
+ * (description of core methods)
+ * 
+ * @author Jean-francois Nepton
+ * @version %I%, %G%
+ * @since 1.0
+ */
 public abstract class Event implements Serializable {
+
+	/**
+	 * Used for serialization
+	 */
+	private static final long serialVersionUID = -5210342678813445499L;
 
 	private long eventTime;
 
@@ -31,40 +47,68 @@ public abstract class Event implements Serializable {
 
 	protected final long delayTime;
 
+	/**
+	 * Main Constructor
+	 * 
+	 * @param delayTime
+	 *            time delay until event will be scheduled
+	 */
 	public Event(long delayTime) {
 		this.delayTime = delayTime;
 		start();
 	}
 
 	/**
-	 * @return the eventTime
+	 * Getter for the time the event should be released
+	 * 
+	 * @return the time the event should be released
 	 */
 	public long getEventTime() {
 		return eventTime;
 	}
 
 	/**
-	 * @return the elapsedTime
+	 * Getter for the time that has already elapsed since the event was issued
+	 * to be released
+	 * 
+	 * @return the elapsed time
 	 */
 	public long getElapsedTime() {
 		return elapsedTime;
 	}
 
 	/**
+	 * Setter for the time that has already passed since event was issued to be
+	 * released
+	 * 
 	 * @param elapsedTime
-	 *            the elapsedTime to set
+	 *            the elapsed time to set for the event
 	 */
 	public void setElapsedTime(long elapsedTime) {
 		this.elapsedTime = elapsedTime;
 	}
 
-	public void start() { // Allows restarting
+	/**
+	 * Starts the event, allows for restarting
+	 */
+	public void start() {
 		eventTime = System.currentTimeMillis() + delayTime;
 	}
 
+	/**
+	 * Check whether the system is ready to be released
+	 * 
+	 * @return whether current time exceeds event time
+	 */
 	public boolean ready() {
 		return System.currentTimeMillis() >= eventTime;
 	}
 
+	/**
+	 * Perform action of the event
+	 * 
+	 * @throws ControllerException
+	 *             if a system failure event is executed
+	 */
 	public abstract void action() throws ControllerException;
 } // /:~

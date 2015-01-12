@@ -9,11 +9,8 @@
 package com.jfbuilds.tme3;
 
 /**
- * Fixable (description of class)
- * <p>
- * (description of core fields)
- * <p>
- * (description of core methods)
+ * Fixable is an interface used to create a repairing object due to system
+ * failure
  * 
  * @author Jean-francois Nepton
  * @version %I%, %G%
