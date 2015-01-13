@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
@@ -52,26 +53,30 @@ import java.util.logging.SimpleFormatter;
 public class GreenhouseControls extends Controller implements Serializable {
 
 	/**
-	 * 
+	 * Used for serialization
 	 */
 	private static final long serialVersionUID = -2636397787261306102L;
 
-	@SuppressWarnings("unused")
+	/**
+	 * Constant to signify a window failure error
+	 */
+	public static final int WINDOW_FAIL = 1;
+
+	/**
+	 * Constant to signify a power failure error
+	 */
+	public static final int POWER_FAIL = 2;
+
 	private boolean light = false;
 
-	@SuppressWarnings("unused")
 	private boolean water = false;
 
-	@SuppressWarnings("unused")
 	private boolean fans = false;
 
-	@SuppressWarnings("unused")
 	private boolean windowsok = true;
 
-	@SuppressWarnings("unused")
 	private boolean poweron = true;
 
-	@SuppressWarnings("unused")
 	private String thermostat = "Day";
 
 	private int errorCode = 0;
@@ -79,751 +84,123 @@ public class GreenhouseControls extends Controller implements Serializable {
 	private String eventsFile = "";
 
 	/**
-	 * LightOn Event to turn lights on
-	 * <p>
-	 * Methods to perform core action of turning the light on and overridden
-	 * toString methods to return human readable information for the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @return the light
 	 */
-	public class LightOn extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = -7070231203706395410L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public LightOn(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			// Put hardware control code here to
-			// physically turn on the light.
-			light = true;
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Light is on";
-		}
+	public boolean isLight() {
+		return light;
 	}
 
 	/**
-	 * LightOff Event to turn lights off
-	 * <p>
-	 * Methods to perform core action of turning the light off and overridden
-	 * toString methods to return human readable information for the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @param light
+	 *            the light to set
 	 */
-	public class LightOff extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = 8673663461171319350L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public LightOff(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			// Put hardware control code here to
-			// physically turn off the light.
-			light = false;
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Light is off";
-		}
+	public void setLight(boolean light) {
+		this.light = light;
 	}
 
 	/**
-	 * WaterOn Event to turn water on
-	 * <p>
-	 * Methods to perform core action of turning the water on and overridden
-	 * toString methods to return human readable information for the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @return the water
 	 */
-	public class WaterOn extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = -2589085048638229674L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public WaterOn(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			// Put hardware control code here.
-			water = true;
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Greenhouse water is on";
-		}
+	public boolean isWater() {
+		return water;
 	}
 
 	/**
-	 * WaterOff Event to turn water off
-	 * <p>
-	 * Methods to perform core action of turning the waater off and overridden
-	 * toString methods to return human readable information for the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @param water
+	 *            the water to set
 	 */
-	public class WaterOff extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = -3487789349647201188L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public WaterOff(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			// Put hardware control code here.
-			water = false;
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Greenhouse water is off";
-		}
+	public void setWater(boolean water) {
+		this.water = water;
 	}
 
 	/**
-	 * FansOn Event to turn fans on
-	 * <p>
-	 * Methods to perform core action of turning the fans on and overridden
-	 * toString methods to return human readable information for the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @return the fans
 	 */
-	public class FansOn extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = -330484887591869815L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public FansOn(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			// Put hardware control code here to
-			// physically turn on the fans.
-			fans = true;
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Fans are on";
-		}
+	public boolean isFans() {
+		return fans;
 	}
 
 	/**
-	 * FansOff Event to turn fans off
-	 * <p>
-	 * Methods to perform core action of turning the fans off and overridden
-	 * toString methods to return human readable information for the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @param fans
+	 *            the fans to set
 	 */
-	public class FansOff extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = 3545151372363490730L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public FansOff(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			// Put hardware control code here to
-			// physically turn off the fans.
-			fans = false;
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Fans are off";
-		}
+	public void setFans(boolean fans) {
+		this.fans = fans;
 	}
 
 	/**
-	 * Thermostat Night Event to set thermostat to Night setting
-	 * <p>
-	 * Methods to perform core action of setting the thermostat to night setting
-	 * and overridden toString methods to return human readable information for
-	 * the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @return the windowsok
 	 */
-	public class ThermostatNight extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = 2986775111303640330L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public ThermostatNight(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			// Put hardware control code here.
-			thermostat = "Night";
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Thermostat on night setting";
-		}
+	public boolean isWindowsok() {
+		return windowsok;
 	}
 
 	/**
-	 * Thermostat Day Event to set thermostat to Day setting
-	 * <p>
-	 * Methods to perform core action of setting the thermostat to day setting
-	 * and overridden toString methods to return human readable information for
-	 * the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @param windowsok
+	 *            the windowsok to set
 	 */
-	public class ThermostatDay extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = -2698723301362506192L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public ThermostatDay(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			// Put hardware control code here.
-			thermostat = "Day";
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Thermostat on day setting";
-		}
+	public void setWindowsok(boolean windowsok) {
+		this.windowsok = windowsok;
 	}
 
 	/**
-	 * Bell Event to set a bell and have it ring one or more times setting
-	 * <p>
-	 * A field for the amount of rings left
-	 * <p>
-	 * Methods to perform core action of adding a bell and inserting a new one
-	 * into event list if multiple rings exist and overridden toString methods
-	 * to return human readable information for the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @return the poweron
 	 */
-	public class Bell extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = -3020843878313098886L;
-
-		int rings;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public Bell(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * Extended Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 * @param rings
-		 *            number of rings to perform bell event
-		 */
-		public Bell(long delayTime, int rings) {
-			super(delayTime);
-			this.rings = rings;
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			if (this.rings > 1)
-				addEvent(new Bell(2000, --this.rings));
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Ring-a-ding(" + rings + ")";
-		}
+	public boolean isPoweron() {
+		return poweron;
 	}
 
 	/**
-	 * Restart Event to set restart the system
-	 * <p>
-	 * Methods to perform core action of setting restarting the system and
-	 * overridden toString methods to return human readable information for the
-	 * event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @param poweron
+	 *            the poweron to set
 	 */
-	public class Restart extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = 294492641628392864L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 * @param filename
-		 *            name of file containing events to be added to system
-		 */
-		public Restart(long delayTime, String filename) {
-			super(delayTime);
-			eventsFile = filename;
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			loadEvents(eventsFile);
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Restarting system";
-		}
+	public void setPoweron(boolean poweron) {
+		this.poweron = poweron;
 	}
 
 	/**
-	 * Terminating Event to stop the system and turn off
-	 * <p>
-	 * Methods to perform core action of turning off the system and overridden
-	 * toString methods to return human readable information for the event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @return the thermostat
 	 */
-	public class Terminate extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = -9093463126901097631L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public Terminate(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() {
-			System.exit(0);
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Terminating";
-		}
+	public String getThermostat() {
+		return thermostat;
 	}
 
 	/**
-	 * WindowMalfunction Event to signifies an error related to the windows
-	 * interface
-	 * <p>
-	 * Methods to perform core action of signifying a window malfunction and
-	 * overridden toString methods to return human readable information for the
-	 * event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @param thermostat
+	 *            the thermostat to set
 	 */
-	public class WindowMalfunction extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = -2960841477738825910L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public WindowMalfunction(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() throws ControllerException {
-			// Put hardware control code here to
-			// physically turn off the fans.
-			windowsok = false;
-			throw new ControllerException(1);
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Window malfunction occurred";
-		}
+	public void setThermostat(String thermostat) {
+		this.thermostat = thermostat;
 	}
 
 	/**
-	 * Power Outage Event to signifies an error related to the power failure
-	 * <p>
-	 * Methods to perform core action of signifying a power outage failure and
-	 * overridden toString methods to return human readable information for the
-	 * event
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @return the errorCode
 	 */
-	public class PowerOut extends Event implements Serializable {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = 8262582940776304830L;
-
-		/**
-		 * Main Constructor
-		 * 
-		 * @param delayTime
-		 *            time delay until event will be scheduled
-		 */
-		public PowerOut(long delayTime) {
-			super(delayTime);
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Event#action()
-		 */
-		@Override
-		public void action() throws ControllerException {
-			// Put hardware control code here to
-			// physically turn on the fans.
-			poweron = false;
-			throw new ControllerException(2);
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Power outage occurred";
-		}
+	public int getErrorCode() {
+		return errorCode;
 	}
 
 	/**
-	 * PowerOn corrects power failure issue
-	 * <p>
-	 * fix turns the power on and zeros out error code
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @param errorCode
+	 *            the errorCode to set
 	 */
-	public class PowerOn implements Fixable {
-
-		/**
-		 * @see com.jfbuilds.tme3.Fixable#fix()
-		 */
-		@Override
-		public void fix() {
-			removeEvent("PowerOut");
-			poweron = true;
-			errorCode = 0;
-			log();
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Fixable#log()
-		 */
-		@Override
-		public void log() {
-			Logger logger = Logger.getLogger("Power On Failure Fix");
-			FileHandler fileHandler;
-			try {
-				fileHandler = new FileHandler("fix.log");
-				logger.addHandler(fileHandler);
-				SimpleFormatter formatter = new SimpleFormatter();
-				fileHandler.setFormatter(formatter);
-				logger.info("System has recovered from a power failure error.");
-			} catch (SecurityException | IOException e) {
-				e.printStackTrace();
-			}
-		}
+	public void setErrorCode(int errorCode) {
+		this.errorCode = errorCode;
 	}
 
 	/**
-	 * FixWindow corrects window failure issue
-	 * <p>
-	 * fix fixes the window and zeros out error code
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @return the eventsFile
 	 */
-	public class FixWindow implements Fixable {
-
-		/**
-		 * @see com.jfbuilds.tme3.Fixable#fix()
-		 */
-		@Override
-		public void fix() {
-			removeEvent("WindowMalfunction");
-			windowsok = true;
-			errorCode = 0;
-			log();
-		}
-
-		/**
-		 * @see com.jfbuilds.tme3.Fixable#log()
-		 */
-		@Override
-		public void log() {
-			Logger logger = Logger.getLogger("Window Malfunction Failure Fix");
-			FileHandler fileHandler;
-			try {
-				fileHandler = new FileHandler("fix.log");
-				logger.addHandler(fileHandler);
-				SimpleFormatter formatter = new SimpleFormatter();
-				fileHandler.setFormatter(formatter);
-				logger.info("System has recovered from a window malfunction error.");
-			} catch (SecurityException | IOException e) {
-				e.printStackTrace();
-			}
-		}
+	public String getEventsFile() {
+		return eventsFile;
 	}
 
 	/**
-	 * ControllerException is thrown when an error occurs in
-	 * GreenhouseController
-	 * 
-	 * @author Jean-francois Nepton
-	 * @version %I%, %G%
-	 * @since 1.0
+	 * @param eventsFile
+	 *            the eventsFile to set
 	 */
-	public class ControllerException extends Exception {
-
-		/**
-		 * Used for serialization
-		 */
-		private static final long serialVersionUID = 5176095538295379753L;
-
-		/**
-		 * @param e
-		 *            code to set to signify error type
-		 */
-		public ControllerException(int e) {
-			errorCode = e;
-		}
-
-		/**
-		 * @see java.lang.Throwable#getMessage()
-		 */
-		@Override
-		public String getMessage() {
-			switch (errorCode) {
-			case 1:
-				return "The Greenhouse Controller has experienced a window malfunction error.";
-			case 2:
-				return "The Greenhouse Controller has experienced a power failure error.";
-			default:
-				return "An unknown error has occured.";
-			}
-		}
-	}
-
-	/**
-	 * Print valid options to be supplied as arguments for application execution
-	 */
-	private static void printUsage() {
-		System.out.println("Correct format: ");
-		System.out.println("  java GreenhouseControls -f <filename>, or");
-		System.out.println("  java GreenhouseControls -d dump.out");
+	public void setEventsFile(String eventsFile) {
+		this.eventsFile = eventsFile;
 	}
 
 	/**
@@ -847,41 +224,6 @@ public class GreenhouseControls extends Controller implements Serializable {
 	}
 
 	/**
-	 * Removes an event from the event list
-	 * 
-	 * @param eventName
-	 *            name of the event to be removed
-	 */
-	private void removeEvent(String eventName) {
-		ArrayList<Event> newList = new ArrayList<Event>();
-		for (Event event : getEventList()) {
-			String className = event.getClass().getSimpleName();
-			if (!className.equals(eventName))
-				newList.add(event);
-		}
-		setEventList(newList);
-	}
-
-	/**
-	 * Loads events for a GreenhouseController
-	 * 
-	 * @param fileName
-	 *            The name of the file containing events to be loaded
-	 */
-	private void loadEvents(String fileName) {
-		File file = new File(fileName);
-		try (Scanner scanner = new Scanner(file)) {
-			while (scanner.hasNext()) {
-				parseEvent(scanner.next());
-			}
-			scanner.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("Could not locate the file " + fileName);
-			e.printStackTrace();
-		}
-	}
-
-	/**
 	 * Logs a severe type error such as a system failure event
 	 * 
 	 * @param message
@@ -899,6 +241,169 @@ public class GreenhouseControls extends Controller implements Serializable {
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Removes an event from the event list
+	 * 
+	 * @param eventName
+	 *            name of the event to be removed
+	 */
+	void removeEvent(String eventName) {
+		ArrayList<Event> newList = new ArrayList<Event>();
+		for (Event event : getEventList()) {
+			String className = event.getClass().getSimpleName();
+			if (!className.equals(eventName))
+				newList.add(event);
+		}
+		setEventList(newList);
+	}
+
+	/**
+	 * Loads events for a GreenhouseController
+	 * 
+	 * @param fileName
+	 *            The name of the file containing events to be loaded
+	 */
+	void loadEvents(String fileName) {
+		File file = new File(fileName);
+		try (Scanner scanner = new Scanner(file)) {
+			while (scanner.hasNext()) {
+				parseEvent(scanner.next());
+			}
+			scanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Could not locate the file " + fileName);
+			e.printStackTrace();
+		}
+	}
+
+	/*
+	 * Returns the appropriate fix to currect system failure issues.
+	 */
+	Fixable getFixable() {
+		if (getErrorCode() == GreenhouseControls.POWER_FAIL)
+			return new PowerOn(this);
+		else
+			return new FixWindow(this);
+	}
+
+	/**
+	 * @see com.jfbuilds.tme3.Controller#shutdown(java.lang.String)
+	 */
+	@Override
+	void shutdown(String errorMessage) {
+		super.shutdown(errorMessage);
+		severeLog(errorMessage);
+		try {
+			saveEventsState(this);
+			dumpGreenhouseControls(this);
+		} catch (IOException e) {
+			System.out.println("Error in writing Greenhouse Controls dump file.");
+			e.printStackTrace();
+		}
+		System.exit(0);
+	}
+
+	/**
+	 * Creates an event based on supplied Event name, timeDelay, and optional
+	 * argument
+	 * 
+	 * @param eventName
+	 *            The name of the event to be checked against a switch statement
+	 *            for corresponding event
+	 * @param timeDelay
+	 *            The delay of time before event is invoked
+	 * @param arg
+	 *            An optional argument supplied to event
+	 */
+	public void createEvent(String eventName, Long timeDelay, int arg) {
+		try {
+			Event event;
+			Class<?> objectClass = Class.forName("com.jfbuilds.tme3." + eventName);
+			if (arg != 0) {
+				event = (Event) objectClass.getConstructors()[1].newInstance(new Object[] { this, timeDelay, arg });
+			} else {
+				// System.out
+				// .println("Number of arguments:" +
+				// objectClass.getConstructors()[0].getParameterTypes().length);
+				event = (Event) objectClass.getConstructors()[0].newInstance(new Object[] { this, timeDelay });
+			}
+			addEvent(event);
+			//
+			//
+			// addEvent(event);
+			// switch (eventName) {
+			// case "LightOn":
+			// // addEvent(new LightOn(this, timeDelay));
+			//
+			// + );
+			// addEvent((Event) objectClass.getConstructors()[0].newInstance(new
+			// Object[] { this, timeDelay }));
+			// // Event event = (Event)
+			// // objectClass.getConstructors().newInstance(new Object[] {
+			// // this, timeDelay });
+			// // addEvent((Event)
+			// // objectClass.getConstructors()[1].newInstance(new Object[] {
+			// // this, timeDelay }));
+			// break;
+			// case "LightOff":
+			// addEvent(new LightOff(this, timeDelay));
+			// break;
+			// case "WaterOn":
+			// addEvent(new WaterOn(this, timeDelay));
+			// break;
+			// case "WaterOff":
+			// addEvent(new WaterOff(this, timeDelay));
+			// break;
+			// case "FansOn":
+			// addEvent(new FansOn(this, timeDelay));
+			// break;
+			// case "FansOff":
+			// addEvent(new FansOff(this, timeDelay));
+			// break;
+			// case "ThermostatDay":
+			// addEvent(new ThermostatDay(this, timeDelay));
+			// break;
+			// case "ThermostatNight":
+			// addEvent(new ThermostatNight(this, timeDelay));
+			// break;
+			// case "Terminate":
+			// addEvent(new Terminate(this, timeDelay));
+			// break;
+			// case "WindowMalfunction":
+			// addEvent(new WindowMalfunction(this, timeDelay));
+			// break;
+			// case "PowerOut":
+			// addEvent(new PowerOut(this, timeDelay));
+			// break;
+			// case "Bell":
+			// if (arg != 0)
+			// addEvent(new Bell(this, timeDelay, arg));
+			// else
+			// addEvent(new Bell(this, timeDelay));
+			// break;
+			// default:
+			// System.out.println("Error in creating event: " + eventName +
+			// ", it will not be added to event list.");
+			// }
+		} catch (IllegalArgumentException | SecurityException | ClassNotFoundException | InstantiationException
+				| IllegalAccessException | InvocationTargetException e) {
+			// catch (IllegalArgumentException | SecurityException |
+			// ClassNotFoundException | InstantiationException
+			// | IllegalAccessException | InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Print valid options to be supplied as arguments for application execution
+	 */
+	private static void printUsage() {
+		System.out.println("Correct format: ");
+		System.out.println("  java GreenhouseControls -f <filename>, or");
+		System.out.println("  java GreenhouseControls -d dump.out");
 	}
 
 	/**
@@ -932,98 +437,6 @@ public class GreenhouseControls extends Controller implements Serializable {
 		}
 	}
 
-	/*
-	 * Returns the current error code, 0 if no error present
-	 */
-	int getError() {
-		return errorCode;
-	}
-
-	/*
-	 * Returns the appropriate fix to currect system failure issues.
-	 */
-	Fixable getFixable(int errorCode) {
-		if (errorCode == 2)
-			return new PowerOn();
-		else
-			return new FixWindow();
-	}
-
-	/**
-	 * @see com.jfbuilds.tme3.Controller#shutdown(java.lang.String)
-	 */
-	@Override
-	void shutdown(String errorMessage) {
-		super.shutdown(errorMessage);
-		severeLog(errorMessage);
-		try {
-			saveEventsState(this);
-			dumpGreenhouseControls(this);
-		} catch (IOException e) {
-			System.out.println("Error in writing Greenhouse Controls dump file.");
-			e.printStackTrace();
-		}
-		System.exit(0);
-	}
-
-	/**
-	 * Creates an event based on supplied Event name, timeDelay, and optional
-	 * argument
-	 * 
-	 * @param eventName
-	 *            The name of the event to be checked against a switch statement
-	 *            for corresponding event
-	 * @param timeDelay
-	 *            The delay of time before event is invoked
-	 * @param arg
-	 *            An optional argument supplied to event
-	 */
-	public void createEvent(String eventName, Long timeDelay, int arg) {
-		switch (eventName) {
-		case "LightOn":
-			addEvent(new LightOn(timeDelay));
-			break;
-		case "LightOff":
-			addEvent(new LightOff(timeDelay));
-			break;
-		case "WaterOn":
-			addEvent(new WaterOn(timeDelay));
-			break;
-		case "WaterOff":
-			addEvent(new WaterOff(timeDelay));
-			break;
-		case "FansOn":
-			addEvent(new FansOn(timeDelay));
-			break;
-		case "FansOff":
-			addEvent(new FansOff(timeDelay));
-			break;
-		case "ThermostatDay":
-			addEvent(new ThermostatDay(timeDelay));
-			break;
-		case "ThermostatNight":
-			addEvent(new ThermostatNight(timeDelay));
-			break;
-		case "Terminate":
-			addEvent(new Terminate(timeDelay));
-			break;
-		case "WindowMalfunction":
-			addEvent(new WindowMalfunction(timeDelay));
-			break;
-		case "PowerOut":
-			addEvent(new PowerOut(timeDelay));
-			break;
-		case "Bell":
-			if (arg != 0)
-				addEvent(new Bell(timeDelay, arg));
-			else
-				addEvent(new Bell(timeDelay));
-			break;
-		default:
-			System.out.println("Error in creating event: " + eventName + ", it will not be added to event list.");
-		}
-	}
-
 	/**
 	 * Entry point of application to check if file was supplied to run events or
 	 * if a dump should be loaded for restoration
@@ -1047,7 +460,7 @@ public class GreenhouseControls extends Controller implements Serializable {
 			} else {
 				Restore restore = new Restore(filename);
 				gc = restore.recoverGreenhouseControls();
-				gc.getFixable(gc.errorCode).fix();
+				gc.getFixable().fix();
 			}
 			gc.run();
 		} catch (ArrayIndexOutOfBoundsException e) {

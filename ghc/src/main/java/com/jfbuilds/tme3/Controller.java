@@ -23,8 +23,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jfbuilds.tme3.GreenhouseControls.ControllerException;
-
 /**
  * Controller base class and framework for a control unit
  * <p>

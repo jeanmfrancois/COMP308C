@@ -21,8 +21,6 @@ package com.jfbuilds.tme3;
 
 import java.io.Serializable;
 
-import com.jfbuilds.tme3.GreenhouseControls.ControllerException;
-
 /**
  * Event is base class for any type of event that may occur within a Greenhouse
  * <p>
@@ -34,7 +32,7 @@ import com.jfbuilds.tme3.GreenhouseControls.ControllerException;
  * @version %I%, %G%
  * @since 1.0
  */
-public abstract class Event implements Serializable {
+public abstract class Event implements Serializable, Runnable {
 
 	/**
 	 * Used for serialization
@@ -45,6 +43,8 @@ public abstract class Event implements Serializable {
 
 	private long elapsedTime = 0;
 
+	private GreenhouseControls controller;
+
 	protected final long delayTime;
 
 	/**
@@ -53,9 +53,35 @@ public abstract class Event implements Serializable {
 	 * @param delayTime
 	 *            time delay until event will be scheduled
 	 */
-	public Event(long delayTime) {
+	// public Event(long delayTime) {
+	// this.delayTime = delayTime;
+	// start();
+	// }
+	/**
+	 * Main Constructor
+	 * 
+	 * @param delayTime
+	 *            time delay until event will be scheduled
+	 */
+	public Event(GreenhouseControls controller, long delayTime) {
+		this.controller = controller;
 		this.delayTime = delayTime;
 		start();
+	}
+
+	/**
+	 * @return the controller
+	 */
+	public GreenhouseControls getController() {
+		return controller;
+	}
+
+	/**
+	 * @param controller
+	 *            the controller to set
+	 */
+	public void setController(GreenhouseControls controller) {
+		this.controller = controller;
 	}
 
 	/**
@@ -111,4 +137,12 @@ public abstract class Event implements Serializable {
 	 *             if a system failure event is executed
 	 */
 	public abstract void action() throws ControllerException;
+
+	/**
+	 * @see java.lang.Runnable#run()
+	 */
+	@Override
+	public void run() {
+		// TODO default run action..
+	}
 } // /:~

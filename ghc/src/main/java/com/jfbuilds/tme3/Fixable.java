@@ -24,8 +24,24 @@ public interface Fixable {
 	void fix();
 
 	/**
-	 * logs to a text file in current directory, identify time and nature of the
+	 * Logs to a text file in current directory, identify time and nature of the
 	 * fix
 	 */
 	void log();
+
+	/**
+	 * Set associated GreenhouseController which called the Fixable object
+	 * 
+	 * @param controller
+	 *            the GreenhouseController to be set
+	 */
+	void setController(GreenhouseControls controller);
+
+	/**
+	 * Get associated GreenhouseController which called the Fixable object
+	 * 
+	 * @param controller
+	 * @return the controller
+	 */
+	GreenhouseControls getController();
 }
