@@ -83,6 +83,9 @@ public class GreenhouseControls extends Controller implements Serializable {
 
 	private String eventsFile = "";
 
+	// TODO create running Thread collection
+	private ArrayList<Runnable> events;
+
 	/**
 	 * @return the light
 	 */
@@ -310,8 +313,8 @@ public class GreenhouseControls extends Controller implements Serializable {
 	 * argument
 	 * 
 	 * @param eventName
-	 *            The name of the event to be checked against a switch statement
-	 *            for corresponding event
+	 *            The name of the event to be automatically generated through
+	 *            reflection
 	 * @param timeDelay
 	 *            The delay of time before event is invoked
 	 * @param arg
@@ -324,75 +327,12 @@ public class GreenhouseControls extends Controller implements Serializable {
 			if (arg != 0) {
 				event = (Event) objectClass.getConstructors()[1].newInstance(new Object[] { this, timeDelay, arg });
 			} else {
-				// System.out
-				// .println("Number of arguments:" +
-				// objectClass.getConstructors()[0].getParameterTypes().length);
 				event = (Event) objectClass.getConstructors()[0].newInstance(new Object[] { this, timeDelay });
 			}
 			addEvent(event);
-			//
-			//
-			// addEvent(event);
-			// switch (eventName) {
-			// case "LightOn":
-			// // addEvent(new LightOn(this, timeDelay));
-			//
-			// + );
-			// addEvent((Event) objectClass.getConstructors()[0].newInstance(new
-			// Object[] { this, timeDelay }));
-			// // Event event = (Event)
-			// // objectClass.getConstructors().newInstance(new Object[] {
-			// // this, timeDelay });
-			// // addEvent((Event)
-			// // objectClass.getConstructors()[1].newInstance(new Object[] {
-			// // this, timeDelay }));
-			// break;
-			// case "LightOff":
-			// addEvent(new LightOff(this, timeDelay));
-			// break;
-			// case "WaterOn":
-			// addEvent(new WaterOn(this, timeDelay));
-			// break;
-			// case "WaterOff":
-			// addEvent(new WaterOff(this, timeDelay));
-			// break;
-			// case "FansOn":
-			// addEvent(new FansOn(this, timeDelay));
-			// break;
-			// case "FansOff":
-			// addEvent(new FansOff(this, timeDelay));
-			// break;
-			// case "ThermostatDay":
-			// addEvent(new ThermostatDay(this, timeDelay));
-			// break;
-			// case "ThermostatNight":
-			// addEvent(new ThermostatNight(this, timeDelay));
-			// break;
-			// case "Terminate":
-			// addEvent(new Terminate(this, timeDelay));
-			// break;
-			// case "WindowMalfunction":
-			// addEvent(new WindowMalfunction(this, timeDelay));
-			// break;
-			// case "PowerOut":
-			// addEvent(new PowerOut(this, timeDelay));
-			// break;
-			// case "Bell":
-			// if (arg != 0)
-			// addEvent(new Bell(this, timeDelay, arg));
-			// else
-			// addEvent(new Bell(this, timeDelay));
-			// break;
-			// default:
-			// System.out.println("Error in creating event: " + eventName +
-			// ", it will not be added to event list.");
-			// }
 		} catch (IllegalArgumentException | SecurityException | ClassNotFoundException | InstantiationException
 				| IllegalAccessException | InvocationTargetException e) {
-			// catch (IllegalArgumentException | SecurityException |
-			// ClassNotFoundException | InstantiationException
-			// | IllegalAccessException | InvocationTargetException e) {
-			// TODO Auto-generated catch block
+			// TODO add catch message
 			e.printStackTrace();
 		}
 	}
@@ -432,10 +372,14 @@ public class GreenhouseControls extends Controller implements Serializable {
 	 *            object to save it's events state
 	 */
 	private static void saveEventsState(GreenhouseControls gc) {
+		// TODO save state in a Two Tupple <String,int> variable for event,
+		// value for setting
 		for (Event event : gc.getEventList()) {
 			event.setElapsedTime(event.getEventTime() - System.currentTimeMillis());
 		}
 	}
+	
+	private void 
 
 	/**
 	 * Entry point of application to check if file was supplied to run events or
@@ -467,5 +411,20 @@ public class GreenhouseControls extends Controller implements Serializable {
 			System.out.println("Invalid number of parameters");
 			printUsage();
 		}
+	}
+
+	// method to suspend all running threads
+	public void suspend() {
+		// TODO implement suspension of all event threads
+	}
+
+	// method to resume all suspended threads
+	public void resume() {
+		// TODO implement resuming of all event threads
+	}
+
+	// method to output to GUI
+	public void broadcast() {
+		// TODO implement method to output to gui
 	}
 } // /:~

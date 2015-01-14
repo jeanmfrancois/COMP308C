@@ -20,6 +20,7 @@
 package com.jfbuilds.tme3;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Event is base class for any type of event that may occur within a Greenhouse
@@ -42,6 +43,9 @@ public abstract class Event implements Serializable, Runnable {
 	private long eventTime;
 
 	private long elapsedTime = 0;
+
+	// TODO Implement a way to keep track of all event type running threads
+	private ArrayList<Event> scheduledEvents;
 
 	private GreenhouseControls controller;
 
@@ -66,6 +70,7 @@ public abstract class Event implements Serializable, Runnable {
 	public Event(GreenhouseControls controller, long delayTime) {
 		this.controller = controller;
 		this.delayTime = delayTime;
+		// TODO Start threads after creation
 		start();
 	}
 
@@ -143,6 +148,5 @@ public abstract class Event implements Serializable, Runnable {
 	 */
 	@Override
 	public void run() {
-		// TODO default run action..
 	}
 } // /:~
