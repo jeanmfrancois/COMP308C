@@ -30,6 +30,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -378,8 +379,17 @@ public class GreenhouseControls extends Controller implements Serializable {
 			event.setElapsedTime(event.getEventTime() - System.currentTimeMillis());
 		}
 	}
-	
-	private void 
+
+	@SuppressWarnings("unused")
+	private <A, B> HashMap<A, B> getVariable() {
+		// TODO create access for Two Tupple of state data :get
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	private synchronized <A, B> void setVariable(HashMap<A, B> state) {
+		// TODO create access for Two Tupple of state data :set
+	}
 
 	/**
 	 * Entry point of application to check if file was supplied to run events or
